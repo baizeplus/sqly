@@ -15,7 +15,7 @@ const (
 var Lg Log
 
 type Log interface {
-	Debug(cost time.Duration, sql string, args ...any)
+	Debug(cost time.Duration, sql string, args ...interface{})
 }
 
 type defaultLog struct {
@@ -30,7 +30,7 @@ func NewDefaultLog(l Level) *defaultLog {
 	return &defaultLog{Level: l}
 }
 
-func (d *defaultLog) Debug(cost time.Duration, sql string, args ...any) {
+func (d *defaultLog) Debug(cost time.Duration, sql string, args ...interface{}) {
 	if d.Level == DebugLevel {
 		log.Println(sql, args, "cost:"+cost.String())
 	}
