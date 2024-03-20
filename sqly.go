@@ -393,8 +393,8 @@ func (db *DB) Beginx() (*Tx, error) {
 // Any placeholder parameters are replaced with supplied args.
 func (db *DB) Queryx(query string, args ...interface{}) (*Rows, error) {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	r, err := db.DB.Query(query, args...)
-	Lg.Debug(query, args, " cost:"+time.Since(start).String())
 	if err != nil {
 		return nil, err
 	}
@@ -405,9 +405,8 @@ func (db *DB) Queryx(query string, args ...interface{}) (*Rows, error) {
 // Any placeholder parameters are replaced with supplied args.
 func (db *DB) QueryRowx(query string, args ...interface{}) *Row {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	rows, err := db.DB.Query(query, args...)
-	cost := time.Since(start).String()
-	Lg.Debug(query, args, " cost:"+cost)
 	return &Row{rows: rows, err: err, unsafe: db.unsafe, Mapper: db.Mapper}
 }
 
@@ -415,9 +414,8 @@ func (db *DB) QueryRowx(query string, args ...interface{}) *Row {
 // Any placeholder parameters are replaced with supplied args.
 func (db *DB) MustExec(query string, args ...interface{}) sql.Result {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	exec := MustExec(db, query, args...)
-	cost := time.Since(start).String()
-	Lg.Debug(query, args, " cost:"+cost)
 	return exec
 }
 
@@ -516,9 +514,8 @@ func (tx *Tx) NamedSelectPage(dest interface{}, total *int64, query string, arg 
 // Any placeholder parameters are replaced with supplied args.
 func (tx *Tx) Queryx(query string, args ...interface{}) (*Rows, error) {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	r, err := tx.Tx.Query(query, args...)
-	cost := time.Since(start).String()
-	Lg.Debug(query, args, " cost:"+cost)
 	if err != nil {
 		return nil, err
 	}
@@ -529,9 +526,8 @@ func (tx *Tx) Queryx(query string, args ...interface{}) (*Rows, error) {
 // Any placeholder parameters are replaced with supplied args.
 func (tx *Tx) QueryRowx(query string, args ...interface{}) *Row {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	rows, err := tx.Tx.Query(query, args...)
-	cost := time.Since(start).String()
-	Lg.Debug(query, args, " cost:"+cost)
 	return &Row{rows: rows, err: err, unsafe: tx.unsafe, Mapper: tx.Mapper}
 }
 
@@ -812,8 +808,8 @@ func LoadFile(e Execer, path string) (*sql.Result, error) {
 // Any placeholder parameters are replaced with supplied args.
 func MustExec(e Execer, query string, args ...interface{}) sql.Result {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	res, err := e.Exec(query, args...)
-	Lg.Debug(query, args, " cost:"+time.Since(start).String())
 	if err != nil {
 		panic(err)
 	}

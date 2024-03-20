@@ -124,8 +124,8 @@ func LoadFileContext(ctx context.Context, e ExecerContext, path string) (*sql.Re
 // Any placeholder parameters are replaced with supplied args.
 func MustExecContext(ctx context.Context, e ExecerContext, query string, args ...interface{}) sql.Result {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	res, err := e.ExecContext(ctx, query, args...)
-	Lg.Debug(query, args, " cost:"+time.Since(start).String())
 	if err != nil {
 		panic(err)
 	}
@@ -209,8 +209,8 @@ func (db *DB) PreparexContext(ctx context.Context, query string) (*Stmt, error) 
 // Any placeholder parameters are replaced with supplied args.
 func (db *DB) QueryxContext(ctx context.Context, query string, args ...interface{}) (*Rows, error) {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	r, err := db.DB.QueryContext(ctx, query, args...)
-	Lg.Debug(query, args, " cost:"+time.Since(start).String())
 	if err != nil {
 		return nil, err
 	}
@@ -221,9 +221,8 @@ func (db *DB) QueryxContext(ctx context.Context, query string, args ...interface
 // Any placeholder parameters are replaced with supplied args.
 func (db *DB) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *Row {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	rows, err := db.DB.QueryContext(ctx, query, args...)
-	cost := time.Since(start).String()
-	Lg.Debug(query, args, " cost:"+cost)
 	return &Row{rows: rows, err: err, unsafe: db.unsafe, Mapper: db.Mapper}
 }
 
@@ -381,9 +380,8 @@ func (tx *Tx) MustExecContext(ctx context.Context, query string, args ...interfa
 // Any placeholder parameters are replaced with supplied args.
 func (tx *Tx) QueryxContext(ctx context.Context, query string, args ...interface{}) (*Rows, error) {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	r, err := tx.Tx.QueryContext(ctx, query, args...)
-	cost := time.Since(start).String()
-	Lg.Debug(query, args, " cost:"+cost)
 	if err != nil {
 		return nil, err
 	}
@@ -440,8 +438,8 @@ func (tx *Tx) NamedGetContext(ctx context.Context, dest interface{}, query strin
 // Any placeholder parameters are replaced with supplied args.
 func (tx *Tx) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *Row {
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	rows, err := tx.Tx.QueryContext(ctx, query, args...)
-	Lg.Debug(query, args, " cost:"+time.Since(start).String())
 	return &Row{rows: rows, err: err, unsafe: tx.unsafe, Mapper: tx.Mapper}
 }
 
