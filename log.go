@@ -1,6 +1,9 @@
 package sqly
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 type Level int8
 
@@ -12,19 +15,23 @@ const (
 var Lg Log
 
 type Log interface {
-	Debug(args ...interface{})
+	Debug(cost time.Duration, sql string, args ...any)
 }
 
 type defaultLog struct {
 	Level Level
 }
 
+func SetLog(lg Log) {
+	Lg = lg
+}
+
 func NewDefaultLog(l Level) *defaultLog {
 	return &defaultLog{Level: l}
 }
 
-func (d *defaultLog) Debug(args ...interface{}) {
+func (d *defaultLog) Debug(cost time.Duration, sql string, args ...any) {
 	if d.Level == DebugLevel {
-		log.Println(args)
+		log.Println(sql, args, "cost:"+cost.String())
 	}
 }

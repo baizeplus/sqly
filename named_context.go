@@ -131,8 +131,8 @@ func NamedExecContext(ctx context.Context, e ExtContext, query string, arg inter
 		return nil, err
 	}
 	start := time.Now()
+	defer Lg.Debug(time.Since(start), query, args)
 	execContext, err := e.ExecContext(ctx, q, args...)
-	Lg.Debug(query, args, " cost:"+time.Since(start).String())
 	return execContext, err
 }
 
