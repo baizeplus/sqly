@@ -339,6 +339,7 @@ func (db *DB) NamedSelect(dest interface{}, query string, arg interface{}) error
 // NamedSelectPage using this DB.
 // Any named placeholder parameters are replaced with fields from arg.
 func (db *DB) NamedSelectPage(dest interface{}, total *int64, query string, arg interface{}, page *Page) error {
+	total = new(int64)
 	countRow, err := db.NamedQuery(sqlFormatCount(query), arg)
 	if err != nil {
 		return err
@@ -493,6 +494,7 @@ func (tx *Tx) NamedSelect(dest interface{}, query string, arg interface{}) error
 // NamedSelectPage a named query within a transaction.
 // Any named placeholder parameters are replaced with fields from arg.
 func (tx *Tx) NamedSelectPage(dest interface{}, total *int64, query string, arg interface{}, page *Page) error {
+	total = new(int64)
 	countRow, err := tx.NamedQuery(sqlFormatCount(query), arg)
 	if err != nil {
 		return err
