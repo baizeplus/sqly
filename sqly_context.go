@@ -177,6 +177,10 @@ func (db *DB) NamedSelectPageContext(ctx context.Context, dest interface{}, tota
 		}
 	}
 	if *total <= page.GetOffset() {
+		v := reflect.ValueOf(dest)
+		elemType := v.Elem().Type().Elem()
+		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
+		v.Elem().Set(newSlice)
 		return nil
 	}
 
@@ -410,6 +414,10 @@ func (tx *Tx) NamedSelectPageContext(ctx context.Context, dest interface{}, tota
 		}
 	}
 	if *total <= page.GetOffset() {
+		v := reflect.ValueOf(dest)
+		elemType := v.Elem().Type().Elem()
+		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
+		v.Elem().Set(newSlice)
 		return nil
 	}
 	return NamedSelectContext(ctx, tx, dest, sqlFormatPage(BindType(tx.DriverName()), query, page), arg)
