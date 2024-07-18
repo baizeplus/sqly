@@ -1088,7 +1088,12 @@ func scanAll(rows rowsi, dest interface{}, structOnly bool) error {
 			}
 		}
 	}
-
+	dv := reflect.ValueOf(dest)
+	if dv.IsNil() || dv.Elem().IsNil() {
+		elemType := dv.Elem().Type().Elem()
+		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
+		dv.Elem().Set(newSlice)
+	}
 	return rows.Err()
 }
 
