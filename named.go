@@ -444,6 +444,12 @@ func NamedQuery(e Ext, query string, arg interface{}) (*Rows, error) {
 	if err != nil {
 		return nil, err
 	}
+	if InclusiveSliceArray(args...) {
+		q, args, err = In(q, args...)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return e.Queryx(q, args...)
 }
 

@@ -119,6 +119,12 @@ func NamedQueryContext(ctx context.Context, e ExtContext, query string, arg inte
 	if err != nil {
 		return nil, err
 	}
+	if InclusiveSliceArray(args...) {
+		q, args, err = In(q, args...)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return e.QueryxContext(ctx, q, args...)
 }
 

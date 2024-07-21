@@ -136,6 +136,17 @@ func asSliceForIn(i interface{}) (v reflect.Value, ok bool) {
 	return v, true
 }
 
+func InclusiveSliceArray(args ...interface{}) bool {
+
+	for _, arg := range args {
+		k := reflect.ValueOf(arg).Kind()
+		if k == reflect.Array || k == reflect.Slice {
+			return true
+		}
+	}
+	return false
+}
+
 // In expands slice values in args, returning the modified query string
 // and a new arg list that can be executed by a database. The `query` should
 // use the `?` bindVar.  The return value uses the `?` bindVar.
