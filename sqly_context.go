@@ -164,19 +164,20 @@ func (db *DB) NamedSelectContext(ctx context.Context, dest interface{}, query st
 // NamedSelectPageContext  using this DB.
 // Any named placeholder parameters are replaced with fields from arg.
 func (db *DB) NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, arg interface{}, page *Page) error {
-	total = new(int64)
+	t := int64(0)
 	countRow, err := db.NamedQueryContext(ctx, sqlFormatCount(query), arg)
 	if err != nil {
 		return err
 	}
 	defer countRow.Close()
 	if countRow.Next() {
-		err = countRow.Scan(total)
+		err = countRow.Scan(&t)
 		if err != nil {
 			return err
 		}
 	}
-	if *total <= page.GetOffset() {
+	*total = t
+	if t <= page.GetOffset() {
 		v := reflect.ValueOf(dest)
 		elemType := v.Elem().Type().Elem()
 		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
@@ -401,19 +402,20 @@ func (tx *Tx) SelectContext(ctx context.Context, dest interface{}, query string,
 // NamedSelectPageContext a named query within a transaction.
 // Any named placeholder parameters are replaced with fields from arg.
 func (tx *Tx) NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, arg interface{}, page *Page) error {
-	total = new(int64)
+	t := int64(0)
 	countRow, err := tx.NamedQueryContext(ctx, sqlFormatCount(query), arg)
 	if err != nil {
 		return err
 	}
 	defer countRow.Close()
 	if countRow.Next() {
-		err = countRow.Scan(total)
+		err = countRow.Scan(&t)
 		if err != nil {
 			return err
 		}
 	}
-	if *total <= page.GetOffset() {
+	*total = t
+	if t <= page.GetOffset() {
 		v := reflect.ValueOf(dest)
 		elemType := v.Elem().Type().Elem()
 		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
