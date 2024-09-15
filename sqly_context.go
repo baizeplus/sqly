@@ -21,7 +21,7 @@ type SqlyContext interface {
 	NamedSelectContext(ctx context.Context, dest interface{}, query string, arg interface{}) error
 	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	NamedGetContext(ctx context.Context, dest interface{}, query string, args interface{}) error
-	NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, arg interface{}, page *Page) error
+	NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, page Page) error
 }
 
 // ConnectContext to a database and verify with a ping.
@@ -163,9 +163,9 @@ func (db *DB) NamedSelectContext(ctx context.Context, dest interface{}, query st
 
 // NamedSelectPageContext  using this DB.
 // Any named placeholder parameters are replaced with fields from arg.
-func (db *DB) NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, arg interface{}, page *Page) error {
+func (db *DB) NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, page Page) error {
 	t := int64(0)
-	countRow, err := db.NamedQueryContext(ctx, sqlFormatCount(query), arg)
+	countRow, err := db.NamedQueryContext(ctx, sqlFormatCount(query), page)
 	if err != nil {
 		return err
 	}
@@ -177,7 +177,7 @@ func (db *DB) NamedSelectPageContext(ctx context.Context, dest interface{}, tota
 		}
 	}
 	*total = t
-	if t <= page.GetOffset() {
+	if t <= (page.GetPage()-1)*page.GetSize() {
 		v := reflect.ValueOf(dest)
 		elemType := v.Elem().Type().Elem()
 		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
@@ -185,7 +185,7 @@ func (db *DB) NamedSelectPageContext(ctx context.Context, dest interface{}, tota
 		return nil
 	}
 
-	return NamedSelectContext(ctx, db, dest, sqlFormatPage(BindType(db.DriverName()), query, page), arg)
+	return NamedSelectContext(ctx, db, dest, sqlFormatPage(BindType(db.DriverName()), query, page), page)
 }
 
 // GetContext using this DB.
@@ -401,9 +401,9 @@ func (tx *Tx) SelectContext(ctx context.Context, dest interface{}, query string,
 
 // NamedSelectPageContext a named query within a transaction.
 // Any named placeholder parameters are replaced with fields from arg.
-func (tx *Tx) NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, arg interface{}, page *Page) error {
+func (tx *Tx) NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, page Page) error {
 	t := int64(0)
-	countRow, err := tx.NamedQueryContext(ctx, sqlFormatCount(query), arg)
+	countRow, err := tx.NamedQueryContext(ctx, sqlFormatCount(query), page)
 	if err != nil {
 		return err
 	}
@@ -415,14 +415,14 @@ func (tx *Tx) NamedSelectPageContext(ctx context.Context, dest interface{}, tota
 		}
 	}
 	*total = t
-	if t <= page.GetOffset() {
+	if t <= (page.GetPage()-1)*page.GetSize() {
 		v := reflect.ValueOf(dest)
 		elemType := v.Elem().Type().Elem()
 		newSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0)
 		v.Elem().Set(newSlice)
 		return nil
 	}
-	return NamedSelectContext(ctx, tx, dest, sqlFormatPage(BindType(tx.DriverName()), query, page), arg)
+	return NamedSelectContext(ctx, tx, dest, sqlFormatPage(BindType(tx.DriverName()), query, page), page)
 }
 
 // NamedSelectContext using this Tx.

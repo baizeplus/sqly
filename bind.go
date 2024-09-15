@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"errors"
+	"github.com/baizeplus/sqly/reflectx"
 	"reflect"
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/baizeplus/sqly/reflectx"
 )
 
 // Bindvar types supported by Rebind, BindMap and BindStruct.
