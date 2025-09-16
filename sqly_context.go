@@ -24,6 +24,7 @@ type SqlyContext interface {
 	NamedSelectPageContext(ctx context.Context, dest interface{}, total *int64, query string, page Page) error
 	MustBeginTx(ctx context.Context, opts *sql.TxOptions) *Tx
 	BeginTxx(ctx context.Context, opts *sql.TxOptions) (*Tx, error)
+	Rebind(query string) string
 }
 
 // ConnectContext to a database and verify with a ping.

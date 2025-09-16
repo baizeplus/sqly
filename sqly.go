@@ -5,13 +5,14 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/baizeplus/sqly/reflectx"
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/baizeplus/sqly/reflectx"
 )
 
 // Although the NameMapper is convenient, in practice it should not
@@ -77,6 +78,7 @@ type Sqly interface {
 	NamedSelectPage(dest interface{}, total *int64, query string, page Page) error
 	MustBegin() *Tx
 	Beginx() (*Tx, error)
+	Rebind(query string) string
 }
 
 // ColScanner is an interface used by MapScan and SliceScan
