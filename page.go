@@ -27,25 +27,33 @@ func sqlFormatPage(bindType int, sql string, page Page) string {
 }
 
 func sqlFormatCount(sql string) string {
-	str := strings.ReplaceAll(strings.ReplaceAll(sql, "\n", " "), "\t", " ")
+	str := strings.ReplaceAll(sql, "\n", " ")
+	str = strings.ReplaceAll(str, "\t", " ")
 	lowerStr := strings.ToLower(str)
-	index := strings.Index(lowerStr, "select ")
-	count := 1
-
-	for count != 0 {
-		i, i2 := inquireSelectOrFrom(lowerStr, index)
-		index += i
-		count += i2
+	
+	// Find the main FROM clause
+	selectIndex := strings.Index(lowerStr, "select")
+	if selectIndex == -1 {
+		return sql
 	}
-	return "select count(*) " + sql[index:]
+	
+	parenCount := 0
+	for i := selectIndex + 6; i < len(str)-4; i++ {
+		if str[i] == '(' {
+			parenCount++
+		} else if str[i] == ')' {
+			parenCount--
+		} else if parenCount == 0 && lowerStr[i:i+4] == "from" {
+			// Check if it's a complete word (not part of another word)
+			if (i == 0 || !isAlphaNum(str[i-1])) && (i+4 >= len(str) || !isAlphaNum(str[i+4])) {
+				return "select count(*) " + str[i:]
+			}
+		}
+	}
+	return sql
 }
 
-func inquireSelectOrFrom(lowerStr string, index int) (int, int) {
-	si := strings.Index(lowerStr[index+1:], " select ")
-	fi := strings.Index(lowerStr[index+1:], " from ")
 
-	if si > fi || si == -1 {
-		return fi + 1, -1
-	}
-	return si + 1, 1
+func isAlphaNum(c byte) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'
 }
